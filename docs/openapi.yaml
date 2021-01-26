@@ -1,0 +1,658 @@
+openapi: '3.0.0'
+info:
+  title: Nu Passport
+  description: REST API for gluu-passport
+  termsOfService: todo
+  contact:
+    name: Gluu Team
+    url: https://support.gluu.org
+    email: support@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.2.2
+
+servers:
+  - url: https://t1.techno24x7.com
+    description: test server
+    variables:
+      basePath:
+        default: passport
+tags:
+  - name: providers
+    description: Manage gluu-passport providers
+  - name: mappings
+    description: Manage gluu-passport mappings
+  - name: config
+    description: Manage gluu-passport configuration
+
+paths:
+  /providers:
+    get:
+      summary: return all providers
+      tags:
+      - providers
+      description: This will return all providers added in passport.
+      operationId: getAllProviders
+      responses:
+        '200':
+          description: An array of providers
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Provider'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    post:
+      summary: creates new provider
+      tags:
+      - providers
+      description: This will create a new provider on gluu-passport and return the created provider
+      operationId: createProvider
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Provider'
+
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+                description: URI for the created provider /providers/{id}.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '5XX':
+          description: Unexpected error
+
+
+  /providers/{providerId}:
+    get:
+      summary: get provider by id
+      tags:
+      - providers
+      description: This will return a provider
+      operationId: getProvider
+      parameters:
+        - in: path
+          name: providerId
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - type: integer
+
+      responses:
+        '200':
+          description: A provider object
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '5XX':
+          description: Unexpected error
+    put:
+      summary: update provider
+      tags:
+      - providers
+      description: Updates corresponding provider replacing all it's data.
+      operationId: replaceProvider
+      parameters:
+        - in: header
+          description:  Etag from the Provider being updated
+          name: If-Match
+          schema:
+            type: string
+        - in: path
+          name: providerId
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - type: integer
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Provider'
+
+      responses:
+        '204':
+          description: Corresponding provider updated with success
+          headers:
+            Etag:
+              schema:
+                type: string
+              description: actual Etag from the updated Provider ressource
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Conflict - Possibly simultaneous update caused by different Etag values
+        '5XX':
+          description: Unexpected error
+
+    delete:
+      tags:
+      - providers
+      summary: delete provider
+      description: Deletes corresponding provider
+      operationId: deleteProvider
+      parameters:
+        - in: header
+          description:  Etag from the Provider being updated
+          name: If-Match
+          schema:
+            type: string
+        - in: path
+          name: providerId
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - type: integer
+
+      responses:
+        '204':
+          description: Corresponding Provider deleted with success
+          headers:
+            Etag:
+              schema:
+                type: string
+              description: actual Etag from the deleted Provider ressource
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/BadRequest'
+        '5XX':
+          description: Unexpected error
+
+  /mappings:
+    get:
+      summary: get all mappings
+      tags:
+        - mappings
+      operationId: getAllMappings
+      description: Return an array of all mappings
+      responses:
+        '200':
+          description: An array of mappings
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Mapping'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: creates mapping
+      tags:
+        - mappings
+      operationId: createMapping
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mapping'
+
+      description: Create a new mapping
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+                description: URI for the created provider /providers/{id}.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mapping'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '5XX':
+          description: Unexpected error
+
+  /mappings/{mappingId}:
+    get:
+      summary: get mapping by id
+      tags:
+        - mappings
+      description: This will return a mapping object
+      operationId: getMapping
+      parameters:
+        - in: path
+          name: mappingId
+          required: true
+          schema:
+            type: string
+
+
+      responses:
+        '200':
+          description: A provider object
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '5XX':
+          description: Unexpected error.
+    put:
+      summary: update mapping
+      tags:
+      - mappings
+      description: Updates corresponding Mapping object replacing all it's data.
+      operationId: replaceMapping
+      parameters:
+        - in: header
+          description:  Etag from the Mapping being updated
+          name: If-Match
+          schema:
+            type: string
+        - in: path
+          name: mappingId
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - type: integer
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mapping'
+
+      responses:
+        '204':
+          description: Corresponding Mapping updated with success
+          headers:
+            Etag:
+              schema:
+                type: string
+              description: actual Etag from the updated Mapping object
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Conflict - Possibly simultaneous update caused by different Etag values
+        '5XX':
+          description: Unexpected error
+
+    delete:
+      tags:
+      - mappings
+      summary: delete provider
+      description: Deletes corresponding mapping object
+      operationId: deleteMapping
+      parameters:
+        - in: header
+          description:  Etag from the Mapping being updated
+          name: If-Match
+          schema:
+            type: string
+        - in: path
+          name: mappingId
+          required: true
+          schema:
+            type: string
+
+
+      responses:
+        '204':
+          description: Corresponding Mapping deleted with success
+          headers:
+            Etag:
+              schema:
+                type: string
+              description: actual Etag from the deleted Mapping object
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/BadRequest'
+        '5XX':
+          description: Unexpected error
+
+  /config:
+    get:
+      summary: return the providers configuration
+      tags:
+      - config
+      description: This will return all providers added in passport.
+      operationId: getConfig
+      responses:
+        '200':
+          description: An array of providers
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Config'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    put:
+      summary: update Config
+      tags:
+      - config
+      description: Updates corresponding Config (unique) object replacing all it's data.
+      operationId: replaceConfig
+      parameters:
+        - in: header
+          description:  Etag from the Config being updated
+          name: If-Match
+          schema:
+            type: string
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Config'
+
+      responses:
+        '204':
+          description: Config updated with success
+          headers:
+            Etag:
+              schema:
+                type: string
+              description: actual Etag from the updated Mapping object
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Conflict - Possibly simultaneous update caused by different Etag values
+        '5XX':
+          description: Unexpected error
+    
+
+
+
+
+
+
+components:
+  schemas:
+    Mapping:
+      type: object
+      required:
+        - id
+        - name
+        - passportStrategyId
+        - mapping
+      properties:
+        id:
+          readOnly: true
+          type: integer
+          format: int64
+          example: 14
+        name:
+          type: string
+          description: Mapping name
+          example: saml_ldap_profile
+        passportStrategyId:
+          type: string
+          description: Related passport strategy id
+          example: passport_saml
+        mapping:
+          type: object
+          description:
+            Mapping with key (Gluu/LDAP) / value (mapping profile). Check example.
+          example:
+            uid: urn:oid:0.9.2342.19200300.100.1.1
+            mail: [email,urn:oid:0.9.2342.19200300.100.1.3,urn:oid:1.2.840.113549.1.9.1]
+            cn: urn:oid:2.16.840.1.113730.3.1.241
+            displayName: urn:oid:2.16.840.1.113730.3.1.241
+            givenName: urn:oid:2.5.4.42
+            sn: urn:oid:2.5.4.4
+
+
+
+
+    Provider:
+      type: object
+      required:
+        - id
+        - displayName
+        - type
+        - mapping
+        - passportStrategyId
+        - enabled
+        - callbackUrl
+        - requestForEmail
+        - emailLinkingSafe
+        - options
+      properties:
+        id:
+          readOnly: true
+          type: integer
+          format: int64
+        slug:
+          readOnly: true
+          type: string
+          description: >
+            Will be created based on displayName
+
+            Example:
+
+            | Name             | slug             | metadata-url                     |
+            |------------------|------------------|----------------------------------|
+            | My Cool Customer | my-cool-customer | /providers/my-cool-customer/meta |
+
+        displayName:
+          type: string
+          description: Name displayed to users
+          example: My Cool Customer
+        type:
+          type: string
+          enum:
+            - saml
+            - openidconnect
+            - openidconnect-oxd
+            - oauth
+
+          description: >
+            - `saml`: for inbound saml flows with desired **IDP**
+
+            - `openidconnect`: for inbound oidc-flows with desired **OP**
+
+            - `openidconnect-oxd`: for inbound oidc flows using **oxd**
+
+            - `oauth`: for inbound oAuth flow with desired AS
+
+        mapping:
+          type: string
+          description: >
+            More infos about attributes mapping (here)[https://gluu.org/docs/gluu-server/4.2/authn-guide/passport/#attribute-mapping-and-transformation]
+            LINK TO MAPPING ID
+          example: saml_ldap_profile
+        passportStrategyId:
+          type: string
+          description: >
+            StrategyId text unique identifier
+          example: passport-saml
+        enabled:
+          type: boolean
+          description: Defines if provider is enabled (true) or not (false)
+          example: true
+        callbackUrl:
+          type: string
+          description: Passport provider callback Url. It's auto-generated.
+          readOnly: true
+        requestForEmail:
+          type: boolean
+          description: Enable request for e-mail feature, for more information please check gluu-passport docs.
+        emailLinkingSafe:
+          type: boolean
+          description: Enable email linking feature, for more information please check gluu-passport docs.
+        authzParams:
+          type: string
+          description: >
+            Usually may be left blank. 
+            It is used to supply the value for the second parameter of Passport.js method passport.authenticate
+        logoPath:
+          type: string
+          description: path for the provider's logo file.
+        options:
+          type: object
+          description: Providers' strategy options. Please check each strategy documentation for options.
+          example:
+            skipRequestCompression: true,
+            authnRequestBinding: HTTP-POST,
+            identifierFormat: urn:oasis:names:tc:SAML:2.0:nameid-format:transient,
+            cert: MIIDhTCCAm0CFACNYWIybrueNC5hU1WfOQpJO6VyMA0GCSqGSIb3DQEBCwUAMH8xCzAJBgNVBAYTAkJSMQswCQYDVQQIDAJTUDESMBAGA1UEBwwJU2FvIFBhdWxvMRQwEgYDVQQKDAtDaHJpcyBUZXN0czEaMBgGA1UEAwwRdDMudGVjaG5vMjR4Ny5jb20xHTAbBgkqhkiG9w0BCQEWDmNocmlzQGdsdXUub3JnMB4XDTIwMDcyODIxMjE1NVoXDTIxMDcyODIxMjE1NVowfzELMAkGA1UEBhMCQlIxCzAJBgNVBAgMAlNQMRIwEAYDVQQHDAlTYW8gUGF1bG8xFDASBgNVBAoMC0NocmlzIFRlc3RzMRowGAYDVQQDDBF0My50ZWNobm8yNHg3LmNvbTEdMBsGCSqGSIb3DQEJARYOY2hyaXNAZ2x1dS5vcmcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC2+RUYIDD+NipJ8n502bZmL1y8007amyOKn8g46EGiJ257apIClqVb2gnE4wxzUXS+c5p35eqFvaGiu0hiW88AdPG0eCpfsdSa0T/GQV1EYWygcBGZanGSNB6a9DMA3TDBTfDbxBm3zDPwu04bw59ZszM3xcFiL6Dq4qdMFym6lF5PWa+B6LBzGeIy/U4YD7PrgKB98i+sjUii4OeMoo1YSMVthc4e9XsPeBM+51aVZabaxLQImb9pc1jNxATjKQJ9V6R4HleyKo11yx2I67vAZQ2lRvUQiQxoTM6kjYcE7eIRCCK7XqX/GP21DAbteuTVKPVLf+Knfcm2PG/egYApAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAKOnpjKGyUe3COY8ZJjt5WRb1XbM+0wBrIZJmxCD2md70HhsksK1493x/3G0mxJcioxmGu4uswNfpaTO6RKcQ2X10TcVgmLqlMnG+dRFac4QC0VWtEZFAYTzYgPZC7wflbFT59RVTBPVhDOITEcD5FdeN2w+jDmGWRxWsmuZwiZ6Nzd6a5CwlkwwEK+z61p5WhmU22VyfeNAxWCAc+RYXkbSsogiQkBb27eRWCsUo44ffZnzbIECSUbdtu9YzJTHo5V4b20/e3TR0XCtTu8ixnT74S6DcsSfDGSOxe2QPsEAGxalHRg4zzyYbXPMEtWoc3XpzLW+OIlJgKPdpy/xqUk=,
+            entryPoint: https://t3.techno24x7.com/idp/profile/SAML2/POST/SSO,
+            issuer: urn:test:default
+        idpInitiated:
+          type: object
+          description: idp-initiated flow settings for provider
+          required:
+            - enabled
+          properties:
+            enabled:
+              type: boolean
+              description: Enable/Disable idp-initiated flow for this provider
+              example: true
+            response_type:
+              type: string
+              description: Response type requested to OIDC OP
+              default: code
+              example: code
+            scope:
+              type: string
+              description: scopes requested to OIDC OP separated by spaces
+              example: openid profile
+              default: openid
+
+
+            
+    Config:
+      type: object
+      required:
+        - serverUri
+        - serverWebPort
+        - spTLSCertPath
+        - spTLSKeyPath
+        - logLevel
+        - idpInitiated
+      properties:
+        serverUri:
+          type: string
+          description: Your host
+          example: https://t1.techno24x7.com
+        serverWebPort:
+          type: integer
+          format: int32
+          default: 8090
+          description: Port to serve inbound identity
+          example: 8090
+        spTLSCrtPath: 
+          type: string
+          default: /etc/certs/passport-sp.crt
+          description: Path to passport Service Provider certificate file
+          example: /etc/certs/passport-sp.crt
+        spTLSKeyPath:
+          type: string
+          default: /etc/certs/passport-sp.key
+          description: Path to passport Service Provider key file
+          example: /etc/certs/passport-sp.key
+        logLevel:
+          type: string
+          enum: 
+            - error
+            - warn
+            - info 
+            - debug 
+            - trace
+          default: info
+
+    IdpInitiated:
+      type: object
+      required:
+        - oidcClient
+      properties:
+        oidcClient:
+          type: object
+          description: OIDC client (oxAuth) used for IDP-INITIATED flows
+          required:
+            - authorizationEndpoint
+            - clientId
+            - acrValues
+          properties:
+            authorizationEndpoint:
+              type: string
+              description: OIDC OP authorization endpoint
+              example: https://t1.techno24x7.com/oxauth/restv1/authorize
+            clientId:
+              type: string
+              description: client ID registered on OIDC OP
+              example: 1503.b9862289-9d1c-4bd3-9197-3bb69c86ffda
+            acrValues:
+              type: string
+              description: ACR Values to send as param to OIDC OP auth endpoint
+              example: passport_saml
+
+
+       
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    
+  responses:
+    BadRequest:
+      description: Bad Request
+    NotFound:
+      description: Ressource not found
