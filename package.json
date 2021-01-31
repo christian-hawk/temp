@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/christian-hawk/passport-config-api/issues"
   },
-  "homepage": "https://github.com/christian-hawk/passport-config-api#readme"
+  "homepage": "https://github.com/christian-hawk/passport-config-api#readme",
+  "devDependencies": {
+    "git-commit-msg-linter": "^3.0.0"
+  }
 }
