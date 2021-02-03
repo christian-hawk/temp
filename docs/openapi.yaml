@@ -10,7 +10,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.2.2
+  version: 0.2.3
 
 servers:
   - url: https://t1.techno24x7.com
@@ -572,7 +572,51 @@ components:
               example: openid profile
               default: openid
 
-
+    Logging:
+      type: object
+      description: Logging configuration
+      required:
+        - logLevel
+        - consoleLogOnly
+        - activeMQConf
+      
+      properties:
+        logLevel:
+          type: string
+          enum: 
+            - error
+            - warn
+            - info 
+            - debug 
+            - trace
+          default: info
+          example: info
+        consoleLogOnly:
+          type: boolean
+          description: prints log to console only
+          example: false
+        activeMQConf:
+          type: object
+          description: ActiveMQ settings
+          required:
+            - enabled
+          properties:
+            enabled:
+              type: boolean
+              default: false
+            host:
+              type: string
+              example: 'mq.techno24x7.com'
+            port:
+              type: integer
+              default: 61616
+            username:
+              type: string
+              example: johndoe
+            password:
+              type: string
+              example: incrediblycomplexpwd
+    
             
     Config:
       type: object
@@ -581,8 +625,10 @@ components:
         - serverWebPort
         - spTLSCertPath
         - spTLSKeyPath
-        - logLevel
+        - logging
         - idpInitiated
+        - postProfileEndpoint
+    
       properties:
         serverUri:
           type: string
@@ -604,16 +650,11 @@ components:
           default: /etc/certs/passport-sp.key
           description: Path to passport Service Provider key file
           example: /etc/certs/passport-sp.key
-        logLevel:
-          type: string
-          enum: 
-            - error
-            - warn
-            - info 
-            - debug 
-            - trace
-          default: info
-
+        logging:
+          $ref: '#/components/schemas/Logging'
+        idpInitiated:
+          $ref: '#/components/schemas/IdpInitiated'
+       
     IdpInitiated:
       type: object
       required:
@@ -641,7 +682,6 @@ components:
               example: passport_saml
 
 
-       
     Error:
       type: object
       properties:
@@ -656,3 +696,4 @@ components:
       description: Bad Request
     NotFound:
       description: Ressource not found
+      
