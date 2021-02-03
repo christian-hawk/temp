@@ -10,5 +10,6 @@ export default {
   transform: {
     '.+\\.ts$': 'ts-jest'
   },
-  testEnvironment: 'node'
+  testEnvironment: 'node',
+  coverageProvider: 'v8'
 }
