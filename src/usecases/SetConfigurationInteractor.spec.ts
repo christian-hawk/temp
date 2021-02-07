@@ -1,4 +1,6 @@
 import { ConfigurationModel } from '../entities/ConfigurationModel'
+import { IConfigurationGateway } from './gateways/IConfigurationGateway'
+import { SetConfigurationResponseModel } from './Models/SetConfigurationResponseModel'
 import { SetConfigurationInteractor } from './SetConfigurationInteractor'
 
 /*
@@ -7,7 +9,7 @@ import { SetConfigurationInteractor } from './SetConfigurationInteractor'
  * - Return response
  */
 
-const fakeConfigurationRequest: ConfigurationModel = {
+const fakeConfiguration: ConfigurationModel = {
   serverUri: 'https://any.host.com',
   serverWebPort: 8090,
   spTLSCrtPath: '/etc/certs/passport-sp.crt',
@@ -33,19 +35,32 @@ const fakeConfigurationRequest: ConfigurationModel = {
 
 }
 
-// const makeConfigurationGateway = () => {
-//   class ConfigurationGatewayStub implements IConfigurationGateway {
-//     async save (configuration: ConfigurationModel): Promise<ConfigurationModel> {
-//       const fakeConfigurationResponse: SetConfigurationResponseModel = fakeConfigurationRequest
-//       return await new Promise(resolve => resolve(fakeConfigurationRequest))
-//     }
-//   }
-// }
+const makeConfigurationGateway = (): IConfigurationGateway => {
+  class ConfigurationGatewayStub implements IConfigurationGateway {
+    async save (configuration: ConfigurationModel): Promise<ConfigurationModel> {
+      const fakeConfigurationResponse: SetConfigurationResponseModel = fakeConfiguration
+      return await new Promise(resolve => resolve(fakeConfigurationResponse))
+    }
+  }
+  return new ConfigurationGatewayStub()
+}
 
 describe('SetConfigurationInteractor', () => {
   test('should return configurationResponse', async () => {
-    const sut = new SetConfigurationInteractor()
-    const response = await sut.set(fakeConfigurationRequest)
-    expect(response).toEqual(fakeConfigurationRequest)
+    const gatewayStub = makeConfigurationGateway()
+    const sut = new SetConfigurationInteractor(gatewayStub)
+
+    const response = await sut.set(fakeConfiguration)
+    expect(response).toEqual(fakeConfiguration)
+  })
+
+  test('should call gateway save once', async () => {
+    const gatewayStub = makeConfigurationGateway()
+    const sut = new SetConfigurationInteractor(gatewayStub)
+
+    const saveSpy = jest.spyOn(gatewayStub, 'save')
+
+    await sut.set(fakeConfiguration)
+    expect(saveSpy).toHaveBeenLastCalledWith(fakeConfiguration)
   })
 })
