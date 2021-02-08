@@ -1,12 +1,14 @@
 import { ConfigurationModel } from '../entities/ConfigurationModel'
 import { IConfigurationGateway } from './gateways/IConfigurationGateway'
+import { ISetConfigurationOutput } from './ISetConfigurationOutput'
+import { SetConfigurationRequestModel } from './Models/SetConfigurationRequestModel'
 import { SetConfigurationResponseModel } from './Models/SetConfigurationResponseModel'
 import { SetConfigurationInteractor } from './SetConfigurationInteractor'
 
 /*
  * - Receive request
  * - Save in persistance
- * - Return response
+ * - Return response promise
  */
 
 const fakeConfiguration: ConfigurationModel = {
@@ -45,22 +47,70 @@ const makeConfigurationGateway = (): IConfigurationGateway => {
   return new ConfigurationGatewayStub()
 }
 
+class PresenterStub implements ISetConfigurationOutput {
+  presentResponse (response: SetConfigurationResponseModel): void {
+    // nothing yet
+  }
+}
+
 describe('SetConfigurationInteractor', () => {
-  test('should return configurationResponse', async () => {
-    const gatewayStub = makeConfigurationGateway()
-    const sut = new SetConfigurationInteractor(gatewayStub)
+  describe('set() method', () => {
+    test('should call presentResponse an instance of ISetConfigurationOutput with response', async () => {
+      const gatewayStub = makeConfigurationGateway()
 
-    const response = await sut.set(fakeConfiguration)
-    expect(response).toEqual(fakeConfiguration)
-  })
+      const presenterStub = new PresenterStub()
+      const presentResponseSpy = jest.spyOn(presenterStub, 'presentResponse')
 
-  test('should call gateway save once', async () => {
-    const gatewayStub = makeConfigurationGateway()
-    const sut = new SetConfigurationInteractor(gatewayStub)
+      const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+      await sut.set(fakeConfiguration)
 
-    const saveSpy = jest.spyOn(gatewayStub, 'save')
+      const fakeConfigurationResponse: SetConfigurationResponseModel = fakeConfiguration
 
-    await sut.set(fakeConfiguration)
-    expect(saveSpy).toHaveBeenLastCalledWith(fakeConfiguration)
+      expect(presentResponseSpy).toHaveBeenLastCalledWith(fakeConfigurationResponse)
+    })
+
+    test('void should return undefined', async () => {
+      const gatewayStub = makeConfigurationGateway()
+      const presenterStub = new PresenterStub()
+      const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+
+      const response = await sut.set(fakeConfiguration)
+      expect(response).toBeUndefined()
+    })
+
+    test('should call gateway save once', async () => {
+      const gatewayStub = makeConfigurationGateway()
+      const presenterStub = new PresenterStub()
+      const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+
+      const saveSpy = jest.spyOn(gatewayStub, 'save')
+
+      await sut.set(fakeConfiguration)
+      expect(saveSpy).toHaveBeenLastCalledWith(fakeConfiguration)
+    })
+
+    describe('transformToConfiguration', () => {
+      test('should exist', () => {
+        const gatewayStub = makeConfigurationGateway()
+        const presenterStub = new PresenterStub()
+        const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+        expect(sut).toHaveProperty('transformReqToConfiguration')
+      })
+      test('should be a function', () => {
+        const gatewayStub = makeConfigurationGateway()
+        const presenterStub = new PresenterStub()
+        const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+        expect(typeof sut.transformReqToConfiguration).toBe('function')
+      })
+      test('should return configuration', () => {
+        const gatewayStub = makeConfigurationGateway()
+        const presenterStub = new PresenterStub()
+        const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+        // so far SetConfigurationRequestModel extends ConfigurationModel (they are the same)
+        const fakeConfigurationRequest: SetConfigurationRequestModel = fakeConfiguration
+        const configuration = sut.transformReqToConfiguration(fakeConfigurationRequest)
+        expect(configuration).toStrictEqual(fakeConfiguration)
+      })
+    })
   })
 })
