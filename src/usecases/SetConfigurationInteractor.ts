@@ -5,7 +5,7 @@ import { IConfigurationGateway } from './gateways/IConfigurationGateway'
 import { ISetConfigurationOutput } from './ISetConfigurationOutput'
 import { SetConfigurationRequestModel } from './Models/SetConfigurationRequestModel'
 
-export class SetConfigurationInteractor {
+export class SetConfigurationInteractor implements ISetConfigurationInput {
   setConfigurationGateway: IConfigurationGateway
   setConfigurationOutput: ISetConfigurationOutput
   constructor (
