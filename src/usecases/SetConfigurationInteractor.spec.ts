@@ -11,6 +11,32 @@ import { SetConfigurationInteractor } from './SetConfigurationInteractor'
  * - Return response promise
  */
 
+interface SutTypes {
+  sut: SetConfigurationInteractor
+  gatewayStub: IConfigurationGateway
+  presenterStub: ISetConfigurationOutput
+}
+
+const makeSut = (): SutTypes => {
+  const presenterStub = makePresenter()
+  const gatewayStub = makeConfigurationGateway()
+  const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+  return {
+    sut,
+    gatewayStub,
+    presenterStub
+  }
+}
+
+const makePresenter = (): ISetConfigurationOutput => {
+  class PresenterStub implements ISetConfigurationOutput {
+    presentResponse (response: SetConfigurationResponseModel): void {
+      // nothing yet
+    }
+  }
+  return new PresenterStub()
+}
+
 const fakeConfiguration: ConfigurationModel = {
   serverUri: 'https://any.host.com',
   serverWebPort: 8090,
@@ -47,21 +73,11 @@ const makeConfigurationGateway = (): IConfigurationGateway => {
   return new ConfigurationGatewayStub()
 }
 
-class PresenterStub implements ISetConfigurationOutput {
-  presentResponse (response: SetConfigurationResponseModel): void {
-    // nothing yet
-  }
-}
-
 describe('SetConfigurationInteractor', () => {
   describe('set() method', () => {
     test('should call presentResponse an instance of ISetConfigurationOutput with response', async () => {
-      const gatewayStub = makeConfigurationGateway()
-
-      const presenterStub = new PresenterStub()
+      const { sut, presenterStub } = makeSut()
       const presentResponseSpy = jest.spyOn(presenterStub, 'presentResponse')
-
-      const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
       await sut.set(fakeConfiguration)
 
       const fakeConfigurationResponse: SetConfigurationResponseModel = fakeConfiguration
@@ -70,19 +86,14 @@ describe('SetConfigurationInteractor', () => {
     })
 
     test('void should return undefined', async () => {
-      const gatewayStub = makeConfigurationGateway()
-      const presenterStub = new PresenterStub()
-      const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+      const { sut } = makeSut()
 
       const response = await sut.set(fakeConfiguration)
       expect(response).toBeUndefined()
     })
 
     test('should call gateway save once', async () => {
-      const gatewayStub = makeConfigurationGateway()
-      const presenterStub = new PresenterStub()
-      const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
-
+      const { sut, gatewayStub } = makeSut()
       const saveSpy = jest.spyOn(gatewayStub, 'save')
 
       await sut.set(fakeConfiguration)
@@ -91,21 +102,15 @@ describe('SetConfigurationInteractor', () => {
 
     describe('transformToConfiguration', () => {
       test('should exist', () => {
-        const gatewayStub = makeConfigurationGateway()
-        const presenterStub = new PresenterStub()
-        const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+        const { sut } = makeSut()
         expect(sut).toHaveProperty('transformReqToConfiguration')
       })
       test('should be a function', () => {
-        const gatewayStub = makeConfigurationGateway()
-        const presenterStub = new PresenterStub()
-        const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+        const { sut } = makeSut()
         expect(typeof sut.transformReqToConfiguration).toBe('function')
       })
       test('should return configuration', () => {
-        const gatewayStub = makeConfigurationGateway()
-        const presenterStub = new PresenterStub()
-        const sut = new SetConfigurationInteractor(gatewayStub, presenterStub)
+        const { sut } = makeSut()
         // so far SetConfigurationRequestModel extends ConfigurationModel (they are the same)
         const fakeConfigurationRequest: SetConfigurationRequestModel = fakeConfiguration
         const configuration = sut.transformReqToConfiguration(fakeConfigurationRequest)
