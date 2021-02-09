@@ -34,18 +34,33 @@ const fakeRequestValues = {
 
 const makeFakeRequest = (): ISetConfigurationRequest => (fakeRequestValues)
 
-describe('SetConfiguration Controller', () => {
-  test('should call isValid onc', async () => {
-    class ValidationStub implements IValidation {
-      isValid (input: any): boolean {
-        return true // default is valid
+describe('SetConfigurationController', () => {
+  describe('handle()', () => {
+    test('should call isValid once', async () => {
+      class ValidationStub implements IValidation {
+        isValid (input: any): boolean {
+          return true // default is valid
+        }
       }
-    }
-    const validationStub = new ValidationStub()
-    const isValidSpy = jest.spyOn(validationStub, 'isValid')
-    const sut = new SetConfigurationController(validationStub)
-    const request: ISetConfigurationRequest = makeFakeRequest()
-    await sut.handle(request)
-    expect(isValidSpy).toBeCalledTimes(1)
+      const validationStub = new ValidationStub()
+      const isValidSpy = jest.spyOn(validationStub, 'isValid')
+      const sut = new SetConfigurationController(validationStub)
+      const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
+      await sut.handle(fakeRequest)
+      expect(isValidSpy).toBeCalledTimes(1)
+    })
+    test('shoud call isValid with request object', async () => {
+      class ValidationStub implements IValidation {
+        isValid (input: any): boolean {
+          return true // default is valid
+        }
+      }
+      const validationStub = new ValidationStub()
+      const isValidSpy = jest.spyOn(validationStub, 'isValid')
+      const sut = new SetConfigurationController(validationStub)
+      const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
+      await sut.handle(fakeRequest)
+      expect(isValidSpy).toBeCalledWith(fakeRequest)
+    })
   })
 })

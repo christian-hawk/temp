@@ -10,12 +10,6 @@ export class SetConfigurationController implements IController {
   }
 
   async handle (request: ISetConfigurationRequest): Promise<void> {
-    this.validation.isValid('')
+    this.validation.isValid(request)
   }
-  // handle (httpRequest: any): any {
-  //   return {
-  //     statusCode: 400,
-  //     body: new Error('Missing param: serverUri')
-  //   }
-  // }
 }
