@@ -7,7 +7,7 @@ import { SetConfigurationController } from './SetConfigurationController'
 // creates a RequestModel (DTO)
 // send RequestModel to Interactor do its stuff
 
-const fakeRequestValues = {
+const makeFakeRequest = (): ISetConfigurationRequest => ({
   serverUri: 'https://any.host.com',
   serverWebPort: 8090,
   spTLSCrtPath: '/etc/certs/passport-sp.crt',
@@ -30,34 +30,45 @@ const fakeRequestValues = {
       acrValues: 'any_acr_value'
     }
   }
+})
+
+const makeValidation = (): IValidation => {
+  class ValidationStub implements IValidation {
+    isValid (input: any): boolean {
+      return true // default is valid
+    }
+  }
+  return new ValidationStub()
 }
 
-const makeFakeRequest = (): ISetConfigurationRequest => (fakeRequestValues)
+interface SutTypes {
+  sut: SetConfigurationController
+  validationStub: IValidation
+}
+
+const makeSut = (): SutTypes => {
+  const validationStub = makeValidation()
+  const sut = new SetConfigurationController(validationStub)
+  return {
+    validationStub,
+    sut
+  }
+}
 
 describe('SetConfigurationController', () => {
   describe('handle()', () => {
     test('should call isValid once', async () => {
-      class ValidationStub implements IValidation {
-        isValid (input: any): boolean {
-          return true // default is valid
-        }
-      }
-      const validationStub = new ValidationStub()
+      const { validationStub, sut } = makeSut()
       const isValidSpy = jest.spyOn(validationStub, 'isValid')
-      const sut = new SetConfigurationController(validationStub)
+
       const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
       await sut.handle(fakeRequest)
       expect(isValidSpy).toBeCalledTimes(1)
     })
     test('shoud call isValid with request object', async () => {
-      class ValidationStub implements IValidation {
-        isValid (input: any): boolean {
-          return true // default is valid
-        }
-      }
-      const validationStub = new ValidationStub()
+      const { validationStub, sut } = makeSut()
       const isValidSpy = jest.spyOn(validationStub, 'isValid')
-      const sut = new SetConfigurationController(validationStub)
+
       const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
       await sut.handle(fakeRequest)
       expect(isValidSpy).toBeCalledWith(fakeRequest)
