@@ -2,6 +2,7 @@
 
 import { ConfigurationModel } from '../entities/ConfigurationModel'
 import { IConfigurationGateway } from './gateways/IConfigurationGateway'
+import { ISetConfigurationInput } from './ISetCofigurationInput'
 import { ISetConfigurationOutput } from './ISetConfigurationOutput'
 import { SetConfigurationRequestModel } from './Models/SetConfigurationRequestModel'
 
