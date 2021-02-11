@@ -1,9 +1,9 @@
 interface ActiveMQConf {
-  enabled: false
-  host: 'mq.anyhost.com'
-  port: 61616
-  username: 'any_username'
-  password: 'any_password'
+  enabled: boolean
+  host: string
+  port: number
+  username: string
+  password: string
 }
 
 interface Logging {
