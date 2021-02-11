@@ -10,6 +10,8 @@ export class SetConfigurationController implements IController {
   }
 
   async handle (request: ISetConfigurationRequest): Promise<void> {
-    this.validation.isValid(request)
+    if (!this.validation.isValid(request)) {
+      return await Promise.reject(new Error(''))
+    }
   }
 }

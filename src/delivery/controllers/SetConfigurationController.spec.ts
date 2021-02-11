@@ -73,5 +73,11 @@ describe('SetConfigurationController', () => {
       await sut.handle(fakeRequest)
       expect(isValidSpy).toBeCalledWith(fakeRequest)
     })
+    test('should reject and throw if invalid request object', async () => {
+      const { validationStub, sut } = makeSut()
+      jest.spyOn(validationStub, 'isValid').mockReturnValue(false)
+      const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
+      await expect(sut.handle(fakeRequest)).rejects.toThrow()
+    })
   })
 })
