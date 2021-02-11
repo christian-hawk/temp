@@ -1,3 +1,4 @@
+import { InvalidRequestError } from '../errors/InvalidRequestError'
 import { ISetConfigurationRequest } from '../requests/ISetConfigurationRequest'
 import { IValidation } from '../validations/IValidation'
 import { SetConfigurationController } from './SetConfigurationController'
@@ -78,6 +79,12 @@ describe('SetConfigurationController', () => {
       jest.spyOn(validationStub, 'isValid').mockReturnValue(false)
       const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
       await expect(sut.handle(fakeRequest)).rejects.toThrow()
+    })
+    test('should be reject with InvalidRequestError', async () => {
+      const { validationStub, sut } = makeSut()
+      jest.spyOn(validationStub, 'isValid').mockReturnValue(false)
+      const fakeRequest: ISetConfigurationRequest = makeFakeRequest()
+      await expect(sut.handle(fakeRequest)).rejects.toEqual(new InvalidRequestError())
     })
   })
 })
