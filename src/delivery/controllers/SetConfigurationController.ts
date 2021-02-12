@@ -14,5 +14,7 @@ export class SetConfigurationController implements IController {
     if (!this.validation.isValid(request)) {
       return await Promise.reject(new InvalidRequestError())
     }
+    // mapping para request model object
+    //  crio um interactor
   }
 }
