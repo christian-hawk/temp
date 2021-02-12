@@ -1,3 +1,5 @@
 export class Mapper {
-  cfgRequest2RequestModel = 'whatever'
+  cfgRequest2RequestModel (): any {
+    return ''
+  }
 }

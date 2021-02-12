@@ -6,5 +6,9 @@ describe('Helpers/Mappers', () => {
       const sut = new Mapper()
       expect(sut.cfgRequest2RequestModel).toBeTruthy()
     })
+    test('should be a method', () => {
+      const sut = new Mapper()
+      expect(typeof sut.cfgRequest2RequestModel).toBe('function')
+    })
   })
 })
